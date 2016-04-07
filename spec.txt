@@ -1,0 +1,4 @@
+Autor: Piotr Szymajda - 273 023
+
+Specyfikacja protokołu wymiany informacji pomiędzy instancjami programu router.
+
