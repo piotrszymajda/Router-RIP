@@ -12,52 +12,73 @@ i tworzenia tablic przekazywania - drugie zad. programistyczne na SK
 #include <unistd.h>
 
 #include "nets.h"
+#include "rip.h"
 
 #define VERSION 1
-#define BUILD 2
+#define BUILD 3
 
 using namespace std;
 
-void man();
+void man ();
 
-int main(int argc, char *argv[])
+int main (int argc, char *argv[])
 {
     if (argc >= 2)
     {   
-        if ( strcmp (argv [1], "--help") == 0 || strcmp (argv [1], "-h") == 0 )
+        if( strcmp (argv [1], "--help") == 0 || strcmp (argv [1], "-h") == 0 )
             man();
-        else if ( strcmp (argv [1], "--version") == 0 || strcmp (argv [1], "-v") == 0 )
+        else if( strcmp (argv [1], "--version") == 0 || strcmp (argv [1], "-v") == 0 )
             cout << "Version: " << VERSION << "." << BUILD << '\n' ;
         else
         {
             cout << "Error: Wrong argument\n";
-            man();
+            man ();
         }
         return 1;
     }
-    else
+    
+    vector<nets*> neighbor;
+    vector<nets*> rib; //routing information base
+ 
+    short interfaces;
+    cout << "Enter the number of interfaces: ";
+    cin >> interfaces;
+    
+    if( interfaces <= 0 )
+   	{
+   		cout << "I feel so lonely ;( \n";
+   		return 0;
+   	}
+   	
+    cout << "Enter interfaces configuration (" << interfaces << " times):\n";
+ 
+    while( interfaces-- )
     {
-        vector<nets> routing;
-        short t;
-        cin >> t;
-        while(t--)
-        {
-            string ip, tmp;
-            short mask, dst;
-            cin >> ip;
-            cin.ignore(10, '/');
-            cin >> mask >> tmp >> dst;
-            
-            routing.push_back(nets(ip.c_str(), mask, dst));
-        }
+        string ip, tmp;
+        short mask, dst;
+        cin >> ip;
+        cin.ignore (100, '/');
+        cin >> mask >> tmp >> dst;
         
-        cout << "Starting table:\n";
-        for(auto&& i: routing) // access by reference, the type of i is nets&
-            cout << i << '\n';
-        
-        cout << '\n';
+        neighbor.push_back (new nets(ip.c_str(), mask, dst, true));
     }
     
+    cout << "------------------------------------------\n";
+    cout << "Starting RIP with following configuration:\n";
+    for( auto&& i: neighbor ) // access by reference
+        cout << "> " << *i << '\n';
+    
+    cout << "------------------------------------------\n";
+    
+    // start RIP
+    rip (neighbor, rib);
+    
+	for( auto&& i: neighbor )
+		delete i;
+
+	for( auto&& i: rib )
+		delete i;
+
     return 0;
 }
 
