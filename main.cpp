@@ -15,7 +15,7 @@ i tworzenia tablic przekazywania - drugie zad. programistyczne na SK
 #include "rip.h"
 
 #define VERSION 1
-#define BUILD 3
+#define BUILD 4
 
 using namespace std;
 
@@ -67,7 +67,6 @@ int main (int argc, char *argv[])
     cout << "Starting RIP with following configuration:\n";
     for( auto&& i: neighbor ) // access by reference
         cout << "> " << *i << '\n';
-    
     cout << "------------------------------------------\n";
     
     // start RIP

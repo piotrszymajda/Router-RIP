@@ -10,7 +10,7 @@
 
 int Socket (int family, int type, int protocol);
 
-void Sendto (int fd, struct icmphdr &icmp_hdr, int flags, const struct sockaddr_in *saddr);
+void Sendto(int fd, const void *buff, int buff_length, int flags, const struct sockaddr_in *saddr);
              
 void Setsockopt (int sockfd, int level, int name, const void *val, socklen_t len);
                  

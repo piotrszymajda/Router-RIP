@@ -35,7 +35,7 @@ void rip (vector<nets*>& neighbor, vector<nets*>& rib)
     FD_ZERO (&read_fd);
     FD_SET (sockfd, &read_fd);
     
-    while( wait_time.tv_sec * microsec_to_sec + wait_time.tv_usec > 0 )
+    while( wait_time.tv_usec != 0 && wait_time.tv_sec != 0 )
     {
 		cout << "Waiting...\n";
     	int rc = select (sockfd+1, &read_fd, NULL, NULL, &wait_time); // w pierwszym argumencie najwyższy (numer) deskryptor+1

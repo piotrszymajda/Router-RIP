@@ -18,11 +18,11 @@ int Socket(int family, int type, int protocol)
 	return fd;
 }
 
-void Sendto(int fd, struct icmphdr &icmp_hdr, int flags, const struct sockaddr_in *saddr)
+void Sendto(int fd, const void *buff, int buff_length, int flags, const struct sockaddr_in *saddr)
 {
-	int sent_bytes = sendto (fd, &icmp_hdr, sizeof(icmp_hdr), flags, (struct sockaddr*)saddr, sizeof(*saddr));
+	int sent_bytes = sendto (fd, buff, buff_length, flags, (struct sockaddr*)saddr, sizeof(*saddr));
 	
-	if( sent_bytes == -1 || sent_bytes != sizeof(icmp_hdr) )
+	if( sent_bytes == -1 || sent_bytes != sizeof(buff_length) )
         print_error ("sendto", -2);
 }
 
