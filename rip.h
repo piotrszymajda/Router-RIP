@@ -5,6 +5,6 @@
 #include <vector>
 #include "nets.h"
 
-void rip (std::vector<nets*>& neighbor, std::vector<nets*>& rib);
+void rip (std::vector<nets*>& neighbor);
 
 #endif // RIP_H

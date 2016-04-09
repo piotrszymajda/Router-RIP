@@ -11,6 +11,7 @@ nets::nets (const char* ip_address, short mask, short dist, bool is_neighbor)
     ,distance(dist)
     ,neighbor(is_neighbor)
     ,last_recv(0)
+    ,to_delete(-1)
 {
      assert (mask >= 0 && mask <= 32);
      assert (distance >= 0 && distance <= MAX_DIST);
@@ -34,6 +35,10 @@ nets::nets (const char* ip_address, short mask, short dist, bool is_neighbor)
 int & nets::operator ++()
 {
 	++last_recv;
+	if( to_delete ) 
+	{ 
+		--to_delete; 
+	}
 	return last_recv;
 }
 
@@ -62,4 +67,20 @@ operator << (std::ostream & os, const nets & net)
     }
     
     return os;
+}
+
+
+int nets::check_status()
+{
+	if( to_delete == 0 )
+	{
+		return -1;
+	}
+	if( last_recv > MAX_WAITING_TIME)
+	{
+		distance = MAX_DIST + 1; // TODO: Wymaga przerobienia, bo jeśli to sąsiad to stracimy info o odległości ;/
+		to_delete = TIME_TO_DELETE;
+		return 0;
+	}
+	return 1;
 }

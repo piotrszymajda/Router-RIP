@@ -15,7 +15,7 @@
 
 using namespace std;
 
-void rip (vector<nets*>& neighbor, vector<nets*>& rib)
+void rip (vector<nets*>& neighbor)
 {
 	// Schemat:	
 	// 1. skonstruj dane z połączenia obu wektorów
@@ -25,20 +25,28 @@ void rip (vector<nets*>& neighbor, vector<nets*>& rib)
 	//    3b. jeśli jest to zaktualizowć, wpp dodać do rib'a
 	//	4. wypisz info - DONE
 	
-    int sockfd = Socket (AF_INET, SOCK_DGRAM, 0);
+	// Uwaga dodatkowa neighbor - do użycia przy wysyłaniu, rib - jako tablica routingu, tzn sąsiedzi też do rib'a
+	int sockfd = Socket (AF_INET, SOCK_DGRAM, 0);
 	
 	fd_set read_fd;
 	FD_ZERO (&read_fd);
 	FD_SET (sockfd, &read_fd);
 		
 	struct timeval wait_time;
-
+	
+	vector<nets*> rib; //routing information base
+    
+	for( auto&& i: neighbor )
+		rib.push_back (new nets(*i));
+	
 	while( true )
 	{
+
+//		prepare_rib_msg(rib, rib_msg);
+//		for( auto&& i: neighbor )
+//			i->send(rib_msg);
+	
 		// increment the value of the variable containing the last round in which we received a reply
-		for( auto&& i: neighbor )
-			++(*i);
-		
 		for( auto&& i: rib )
 			++(*i);
 		
@@ -54,8 +62,8 @@ void rip (vector<nets*>& neighbor, vector<nets*>& rib)
 		
 			if( rc == 0 )
 			{
-		        break;
-		    }
+		        	break;
+		    	}
 		
 			cout << "Reciving...\n";
 			
@@ -65,24 +73,23 @@ void rip (vector<nets*>& neighbor, vector<nets*>& rib)
 			// Sprawdzić czy od kogoś nic nie otrzymaliśmy
 		}
 		
-		/*
-		for( auto&& i: neighbor )
-			i->sprawdzenie() ?
-		
 		for( auto&& i: rib )
-			i->sprawdzenie() ?
-		*/
+			if( i->check_status() < 0 )
+				delete i;
+		
 		
 		cout << "Routing table:\n";
-		for( auto&& i: neighbor )
-			cout << *i << '\n';
 		
 		for( auto&& i: rib )
 			cout << *i << '\n';
 
-		cout << '\n';
+		cout << '\n';		
 
 	}
 	
+
+	for( auto&& i: rib )
+		delete i;
+		
 	close (sockfd);
 }

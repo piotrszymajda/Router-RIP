@@ -38,7 +38,6 @@ int main (int argc, char *argv[])
     }
     
     vector<nets*> neighbor;
-    vector<nets*> rib; //routing information base
  
     short interfaces;
     cout << "Enter the number of interfaces: ";
@@ -70,12 +69,9 @@ int main (int argc, char *argv[])
     cout << "------------------------------------------\n";
     
     // start RIP
-    rip (neighbor, rib);
+    rip (neighbor);
     
 	for( auto&& i: neighbor )
-		delete i;
-
-	for( auto&& i: rib )
 		delete i;
 
     return 0;
