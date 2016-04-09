@@ -16,6 +16,8 @@ void Setsockopt (int sockfd, int level, int name, const void *val, socklen_t len
                  
 ssize_t Recvfrom (int fd, void *ptr, int flags, struct sockaddr_in &saddr);
 
+int Select (int nfds, fd_set *readfds, struct timeval *timeout);
+
 void print_error (std::string fname, int exit_no);
 
 #endif // SOCKET_OP_H

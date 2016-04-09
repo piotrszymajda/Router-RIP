@@ -64,7 +64,7 @@ int main (int argc, char *argv[])
     }
     
     cout << "------------------------------------------\n";
-    cout << "Starting RIP with following configuration:\n";
+    cout << "\033[1mStarting RIP with following configuration: \033[0m\n";
     for( auto&& i: neighbor ) // access by reference
         cout << "> " << *i << '\n';
     cout << "------------------------------------------\n";

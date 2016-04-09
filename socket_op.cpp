@@ -5,7 +5,7 @@
 
 void print_error (std::string fname, int exit_no)
 {
-    std::cout << fname << "(...) failed. Error: " << errno << " - "<< strerror (errno) << "\n";
+    std::cout << fname << "(...) failed. \033[1;31mError:\033[0m " << errno << " - "<< strerror (errno) << "\n";
     exit (exit_no); 
 }
 
@@ -41,4 +41,13 @@ ssize_t Recvfrom(int fd, void *ptr, int flags, struct sockaddr_in &saddr)
             print_error ("recvfrom", -4);
 			
 	return rec_bytes;
+}
+
+int Select (int nfds, fd_set *readfds, struct timeval *timeout)
+{
+	int rc = select (nfds, readfds, NULL, NULL, timeout); // w pierwszym argumencie najwyższy (numer) deskryptor+1
+    if( rc < 0 )
+        print_error ("select", -1);
+        
+    return rc;
 }

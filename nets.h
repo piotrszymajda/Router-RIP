@@ -6,7 +6,7 @@
 #include <netinet/ip_icmp.h>
 #include <ostream>
 
-#define MAX_DIST 16
+#define MAX_DIST 32
 
 class nets
 {
@@ -18,9 +18,12 @@ class nets
     short 	netmask;
     short 	distance;
     bool 	neighbor;
+    int		last_recv;
 
 public:
-    nets (const char* ip_adress, short mask, short dist, bool is_neighbor = false);
+    nets (const char* ip_address, short mask, short dist, bool is_neighbor = false);
+    
+    int &operator ++();
     friend std::ostream& operator<< (std::ostream & os, const nets &net);
 };
 

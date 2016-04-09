@@ -6,10 +6,11 @@
 // Autor: Piotr Szymajda - 273 023
 #include <climits>
 
-nets::nets (const char* ip_adress, short mask, short dist, bool is_neighbor)
+nets::nets (const char* ip_address, short mask, short dist, bool is_neighbor)
     :netmask(mask)
     ,distance(dist)
     ,neighbor(is_neighbor)
+    ,last_recv(0)
 {
      assert (mask >= 0 && mask <= 32);
      assert (distance >= 0 && distance <= MAX_DIST);
@@ -17,9 +18,9 @@ nets::nets (const char* ip_adress, short mask, short dist, bool is_neighbor)
      bzero (&recp, sizeof(recp));
      recp.sin_family = AF_INET;
         
-     if( inet_pton(AF_INET, ip_adress, &(recp.sin_addr)) != 1 )
+     if( inet_pton(AF_INET, ip_address, &(recp.sin_addr)) != 1 )
      {
-        // error
+		std::cout << "\033[1;31mError: \033[0m" << ip_address<< " is NOT IP address\n";
         exit(1);
      }
      
@@ -27,6 +28,13 @@ nets::nets (const char* ip_adress, short mask, short dist, bool is_neighbor)
 	 //netadress >>= mask-1;
 	 netadress &= recp.sin_addr.s_addr;
      
+}
+
+
+int & nets::operator ++()
+{
+	++last_recv;
+	return last_recv;
 }
 
 std::ostream& 
@@ -37,13 +45,13 @@ operator << (std::ostream & os, const nets & net)
     addr.s_addr = net.netadress;
     char *net_ip = inet_ntoa (addr);
     
-    if( net.neighbor )
-    {
-        os << net_ip << '/' << net.netmask << " distance "<< net.distance <<" connected directly";
-    }
-    else if( net.distance >= MAX_DIST )
+    if( net.distance >= MAX_DIST )
     {
         os << net_ip << '/' << net.netmask << " unreachable";
+    }
+    else if( net.neighbor )
+    {
+        os << net_ip << '/' << net.netmask << " distance "<< net.distance <<" connected directly";
     }
     else
     {
