@@ -22,7 +22,7 @@ void Sendto(int fd, const void *buff, int buff_length, int flags, const struct s
 {
 	int sent_bytes = sendto (fd, buff, buff_length, flags, (struct sockaddr*)saddr, sizeof(*saddr));
 	
-	if( sent_bytes == -1 || sent_bytes != sizeof(buff_length) )
+	if( sent_bytes == -1 || sent_bytes != buff_length )
         print_error ("sendto", -2);
 }
 
@@ -51,3 +51,13 @@ int Select (int nfds, fd_set *readfds, struct timeval *timeout)
         
     return rc;
 }
+
+void Bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
+{
+	if( bind (sockfd, addr, addrlen) < 0 ) 
+	{
+        print_error ("bind", -2);
+	}
+
+}
+

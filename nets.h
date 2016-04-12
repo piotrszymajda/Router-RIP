@@ -10,6 +10,8 @@
 #define MAX_WAITING_TIME 5
 #define TIME_TO_DELETE 5
 
+#define PORT 8888
+
 class nets
 {
     //ip adress
@@ -25,10 +27,11 @@ class nets
 public:
     nets (const char* ip_address, short mask, short dist, bool is_neighbor = false);
     
-    int &operator ++();
+    int 	&operator ++();
     friend std::ostream& operator<< (std::ostream & os, const nets &net);
     
-    int check_status();
+    int 	check_status();
+	void	send(u_int8_t * msg, int socket);
 };
 
 std::ostream& 

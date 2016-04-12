@@ -1,10 +1,12 @@
+// Autor: Piotr Szymajda - 273 023
 #include "nets.h"
 
 #include <assert.h>
 #include <iostream>
 #include <strings.h>
-// Autor: Piotr Szymajda - 273 023
 #include <climits>
+
+#include "socket_op.h"
 
 nets::nets (const char* ip_address, short mask, short dist, bool is_neighbor)
     :netmask(mask)
@@ -17,7 +19,8 @@ nets::nets (const char* ip_address, short mask, short dist, bool is_neighbor)
      assert (distance >= 0 && distance <= MAX_DIST);
      
      bzero (&recp, sizeof(recp));
-     recp.sin_family = AF_INET;
+     recp.sin_family 	= AF_INET;
+     recp.sin_port		= htons(PORT);
         
      if( inet_pton(AF_INET, ip_address, &(recp.sin_addr)) != 1 )
      {
@@ -35,7 +38,7 @@ nets::nets (const char* ip_address, short mask, short dist, bool is_neighbor)
 int & nets::operator ++()
 {
 	++last_recv;
-	if( to_delete ) 
+	if( to_delete > 0 ) 
 	{ 
 		--to_delete; 
 	}
@@ -72,15 +75,27 @@ operator << (std::ostream & os, const nets & net)
 
 int nets::check_status()
 {
+	if( neighbor )
+	{
+		return 2;
+	}
+	
 	if( to_delete == 0 )
 	{
 		return -1;
 	}
+	
 	if( last_recv > MAX_WAITING_TIME)
 	{
-		distance = MAX_DIST + 1; // TODO: Wymaga przerobienia, bo jeśli to sąsiad to stracimy info o odległości ;/
+		distance = MAX_DIST + 1;
 		to_delete = TIME_TO_DELETE;
 		return 0;
 	}
+	
 	return 1;
+}
+
+void nets::send(u_int8_t * msg, int socket)
+{
+	Sendto(socket, msg, strlen((char*)msg), 0, &recp);	
 }

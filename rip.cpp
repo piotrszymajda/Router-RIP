@@ -15,6 +15,13 @@
 
 using namespace std;
 
+void prepare_rib_msg(vector<nets*>& rib, u_int8_t* msg)
+{
+	msg[0]='A';
+	msg[1]='B';
+	msg[2]='C';
+}
+
 void rip (vector<nets*>& neighbor)
 {
 	// Schemat:	
@@ -31,7 +38,15 @@ void rip (vector<nets*>& neighbor)
 	fd_set read_fd;
 	FD_ZERO (&read_fd);
 	FD_SET (sockfd, &read_fd);
-		
+	
+	struct sockaddr_in server_address;
+	bzero (&server_address, sizeof(server_address));
+	server_address.sin_family      = AF_INET;
+	server_address.sin_port        = htons (PORT);
+	server_address.sin_addr.s_addr = htonl (INADDR_ANY);
+	
+	Bind (sockfd, (struct sockaddr*)&server_address, sizeof(server_address));
+	
 	struct timeval wait_time;
 	
 	vector<nets*> rib; //routing information base
@@ -39,12 +54,14 @@ void rip (vector<nets*>& neighbor)
 	for( auto&& i: neighbor )
 		rib.push_back (new nets(*i));
 	
+	u_int8_t rib_msg[IP_MAXPACKET];
+		
 	while( true )
 	{
-
-//		prepare_rib_msg(rib, rib_msg);
-//		for( auto&& i: neighbor )
-//			i->send(rib_msg);
+		bzero (&rib_msg, sizeof(rib_msg));
+		prepare_rib_msg(rib, rib_msg);
+		for( auto&& i: neighbor )
+			i->send (rib_msg, sockfd);
 	
 		// increment the value of the variable containing the last round in which we received a reply
 		for( auto&& i: rib )
@@ -62,8 +79,8 @@ void rip (vector<nets*>& neighbor)
 		
 			if( rc == 0 )
 			{
-		        	break;
-		    	}
+	        	break;
+	    	}
 		
 			cout << "Reciving...\n";
 			
