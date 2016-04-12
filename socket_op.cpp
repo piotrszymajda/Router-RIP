@@ -58,6 +58,5 @@ void Bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 	{
         print_error ("bind", -2);
 	}
-
 }
 

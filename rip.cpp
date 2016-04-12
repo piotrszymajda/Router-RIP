@@ -23,7 +23,7 @@ void prepare_rib_msg(vector<nets*>& rib, u_int8_t* msg)
 }
 
 void rip (vector<nets*>& neighbor)
-{
+{    
 	// Schemat:	
 	// 1. skonstruj dane z połączenia obu wektorów
 	// 2. wyślij dane w pakietach do wszystkich sąsaiadów ( sieci, po broadcast'cie), zgodnie z spec.txt
@@ -34,7 +34,10 @@ void rip (vector<nets*>& neighbor)
 	
 	// Uwaga dodatkowa neighbor - do użycia przy wysyłaniu, rib - jako tablica routingu, tzn sąsiedzi też do rib'a
 	int sockfd = Socket (AF_INET, SOCK_DGRAM, 0);
-	
+	int broadcast_perm = 1;
+    setsockopt (sockfd, SOL_SOCKET, SO_BROADCAST, (void *)&broadcast_perm, sizeof(broadcast_perm));
+  
+
 	fd_set read_fd;
 	FD_ZERO (&read_fd);
 	FD_SET (sockfd, &read_fd);
@@ -53,9 +56,13 @@ void rip (vector<nets*>& neighbor)
     
 	for( auto&& i: neighbor )
 		rib.push_back (new nets(*i));
-	
+    
 	u_int8_t rib_msg[IP_MAXPACKET];
-		
+	
+    struct sockaddr_in 	sender;	
+    socklen_t 			sender_len = sizeof(sender);
+    u_int8_t 			buffer[IP_MAXPACKET+1];
+    
 	while( true )
 	{
 		bzero (&rib_msg, sizeof(rib_msg));
@@ -84,7 +91,10 @@ void rip (vector<nets*>& neighbor)
 		
 			cout << "Reciving...\n";
 			
+            bzero (&buffer, sizeof(buffer));
 			// Recivefrom ...
+            ssize_t rec_bytes = Recvfrom(sockfd, buffer, 0, sender);
+            cout << buffer << '\n';
 			// Sprawdż poprawność
 			// Sprawdź czy to coś nowego czy aktualizacja
 			// Sprawdzić czy od kogoś nic nie otrzymaliśmy

@@ -15,12 +15,15 @@
 class nets
 {
     //ip adress
-    struct 	sockaddr_in recp;
+    struct 	sockaddr_in recp, broadcast;
+    struct	in_addr netmask_addr;
+    struct	in_addr broadcast_addr;
     
     int 	netadress;
     short 	netmask;
     short 	distance;
     bool 	neighbor;
+    
     int		last_recv;
     int		to_delete;
 
@@ -31,7 +34,8 @@ public:
     friend std::ostream& operator<< (std::ostream & os, const nets &net);
     
     int 	check_status();
-	void	send(u_int8_t * msg, int socket);
+    void	send(u_int8_t * msg, int socket);
+    void	confirm_connection();
 };
 
 std::ostream& 

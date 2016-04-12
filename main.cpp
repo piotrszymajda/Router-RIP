@@ -65,7 +65,7 @@ int main (int argc, char *argv[])
         
         neighbor.push_back (new nets(ip.c_str(), mask, dst, true));
     }
-    
+        
     cout << "------------------------------------------\n";
     cout << "\033[1mStarting RIP with following configuration: \033[0m\n";
     for( auto&& i: neighbor ) // access by reference

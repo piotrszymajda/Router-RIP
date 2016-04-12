@@ -9,7 +9,7 @@
 #include <iostream>
 
 int 	Socket (int family, int type, int protocol);
-void 	Sendto(int fd, const void *buff, int buff_length, int flags, const struct sockaddr_in *saddr);  
+void 	Sendto(int fd, const void *buff, int buff_length, int flags, const struct sockaddr_in *saddr);
 void 	Setsockopt (int sockfd, int level, int name, const void *val, socklen_t len);  
 ssize_t Recvfrom (int fd, void *ptr, int flags, struct sockaddr_in &saddr);
 int 	Select (int nfds, fd_set *readfds, struct timeval *timeout);
