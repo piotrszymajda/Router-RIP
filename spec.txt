@@ -30,8 +30,18 @@ z użyciem select'a program czeka na informacje od innych instancji programu.
 	 3. czekaj na jakieś info przez WAIT_TIME czasu, ciągłymi select'ami
 	    3a. jeśli coś przyjdzie sprawdzić poprawność i sprawdzić czy nie ma tego rib'ie
 	    3b. jeśli jest to zaktualizowć, wpp dodać do rib'a
-	 4. wypisz informacje
+     4. usuń wpisy od sieci o których już długo nie mamy informacji
+	 5. wypisz informacje
 	
+! Nadanie odległości nieskończoność i usunięcie wpisu z RIB'a:
+
+Nadanie odległości nieskończoność następuje w przypadku, gdy przez MAX_WAITING_TIME (domyślnie 5) nie otrzymaliśmy żadnych informacji o tej sieci. Odległość ta jest 
+dowolną wartością większą niż MAX_DIST (domyślnie 32). Zazwyczaj jest to MAX_DIST+1.
+
+Gdy jakaś sieć ma odległość nieskończoność to po TIME_TO_DELETE (domyślnie 5) jest
+usuwana z RIB'a.
+
+Gdy w RIB'ie nie zostanie żaden wpis rozsyła on pakiet o treści: "I feel so lonely".
 
 ODLEGŁOŚCI:
 ------------

@@ -99,12 +99,6 @@ int nets::check_status()
 		to_delete = TIME_TO_DELETE;
 		return 0;
 	}
-	
-	if( neighbor )
-	{
-		return 2;
-	}
-	
 	if( to_delete == 0 )
 	{
 		return -1;

@@ -15,7 +15,7 @@ i tworzenia tablic przekazywania - drugie zad. programistyczne na SK
 #include "rip.h"
 
 #define VERSION 1
-#define BUILD 5
+#define BUILD 6
 
 using namespace std;
 
