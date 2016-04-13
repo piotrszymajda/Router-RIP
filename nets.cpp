@@ -27,16 +27,16 @@ nets::nets (const char* ip_address, short mask, short dist, bool is_neighbor)
 		std::cout << "\033[1;31mError: \033[0m" << ip_address<< " is NOT IP address\n";
 		exit(1);
 	}
-		
+
 	netadress = (1 << (mask)) -1;
-	 
+	
 	netmask_addr.s_addr = netadress;
-	 
+	
 	int bc = recp.sin_addr.s_addr | (~ netadress);
 	netadress &= recp.sin_addr.s_addr;
-	 
+	
 	broadcast_addr.s_addr = bc;
-	 
+	
 	bzero (&broadcast, sizeof(broadcast));
 	broadcast.sin_family 	= AF_INET;
 	broadcast.sin_port		= htons(PORT);
@@ -55,9 +55,12 @@ int & nets::operator ++()
 		--to_delete; 
 	}
 		
+#ifdef DEBUG 
 	char host_ip [20]; 
 	inet_ntop (AF_INET, &(recp.sin_addr), host_ip, sizeof(host_ip));
 	std::cout << "To delete: " << host_ip << " " << to_delete << '\n';
+#endif
+
 	return last_recv;
 }
 
@@ -79,8 +82,8 @@ operator << (std::ostream & os, const nets & net)
 	}
 	else
 	{
-	char host_ip [20]; 
-	inet_ntop (AF_INET, &(net.recp.sin_addr), host_ip, sizeof(host_ip));
+	    char host_ip [20]; 
+	    inet_ntop (AF_INET, &(net.recp.sin_addr), host_ip, sizeof(host_ip));
 	
 		os << net_ip << '/' << net.netmask << " distance " << net.distance << " via " << host_ip;
 	}
@@ -110,10 +113,16 @@ int nets::check_status()
 	return 1;
 }
 
-void nets::send(u_int8_t * msg, int socket)
+void nets::send(u_int8_t * msg, int msg_length, int socket)
 {
-	Sendto(socket, msg, strlen((char*)msg), 0, &broadcast);
-	std::cout << "Sending " << msg << '\n'; 
+	Sendto(socket, msg, msg_length, 0, &broadcast);
+	
+#ifdef DEBUG 
+	std::cout << "Sending ";
+	for(int i=0; i<msg_length; ++i)
+	    std::cout << (int)msg[i] << ' '; 
+	std::cout << '\n';
+#endif 
 }
 
 void nets::confirm_connection()

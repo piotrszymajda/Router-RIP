@@ -34,8 +34,12 @@ public:
     friend std::ostream& operator<< (std::ostream & os, const nets &net);
     
     int 	check_status();
-    void	send(u_int8_t * msg, int socket);
+    void	send(u_int8_t * msg, int msg_length, int socket);
     void	confirm_connection();
+    
+    short   get_distance() { return distance; }
+    int     get_network_ip() { return netadress; }
+    short   get_network_mask() { return netmask; }
 };
 
 std::ostream& 

@@ -2,3 +2,40 @@ Autor: Piotr Szymajda - 273 023
 
 Specyfikacja protokołu wymiany informacji pomiędzy instancjami programu router.
 
+
+
+FORMAT PRZESYŁANYCH DANYCH:
+----------------------------
+Przesyłana wiadomość ma następującą składnie:
+
+W pierwszych 4 bajtach ilość wpisów w RIPie nadającego wiadomość
+Dla każdego wpisu 6 bajtów:
+    4 bajty na adres sieci, 1 bajt na maske, 1 bajt na dystans
+4 bajty sumy kontrolnej
+
+Uwaga: Wszystkie int32 są zapisywane w Little endian (bajty zapisywane są w 
+ kolejności od najmłodszego)
++---+
+|   | <- 1 bajt
++---+
+
++---+---+---+---+
+|   |   |   |   |          <- 4 bajty = int32 ilość wpisów
++---+---+---+---+---+---+
+|IP |IP |IP |IP |MSK|DST|  <- 6 bajtów = 4 bajty na adres IP, 1 na MaSKe i 1 na DySTans
++---+---+---+---+---+---+
+|   |   |   |   |   |   |
++---+---+---+---+---+---+
+.   .   .   .   .   .   .
+.   .   .   .   .   .   .
+.   .   .   .   .   .   .
++---+---+---+---+---+---+
+|   |   |   |   |   |   |
++---+---+---+---+---+---+
+|   |   |   |   |          <- 4 bajty = suma kontrolna
++---+---+---+---+
+
+SUMA KONTROLNA
+---------------
+Suma kontrolna jest sumą wszystkich przesłanych adresów ip, mask sieci, dystansów
+w danej wiadomości. Uwaga: bajty adresu ip są w odwróconej kolejności. 
