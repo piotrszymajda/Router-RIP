@@ -18,9 +18,9 @@ using namespace std;
 void int32_to_char(u_int32_t x, u_int8_t* tab, int offset)
 {
 	tab[offset+3] = (x>>24) & 0xFF;
-    tab[offset+2] = (x>>16) & 0xFF;
-    tab[offset+1] = (x>>8) & 0xFF;
-    tab[offset] = x & 0xFF;
+	tab[offset+2] = (x>>16) & 0xFF;
+	tab[offset+1] = (x>>8) & 0xFF;
+	tab[offset] = x & 0xFF;
 }
 
 #define BYTE_BY_RECORD 6
@@ -70,7 +70,7 @@ void rip (vector<nets*>& neighbor)
 	// Uwaga dodatkowa neighbor - do użycia przy wysyłaniu, rib - jako tablica routingu, tzn sąsiedzi też do rib'a
 	int sockfd = Socket (AF_INET, SOCK_DGRAM, 0);
 	int broadcast_perm = 1;
-    setsockopt (sockfd, SOL_SOCKET, SO_BROADCAST, (void *)&broadcast_perm, sizeof(broadcast_perm));
+	setsockopt (sockfd, SOL_SOCKET, SO_BROADCAST, (void *)&broadcast_perm, sizeof(broadcast_perm));
   
 
 	fd_set read_fd;
@@ -84,7 +84,7 @@ void rip (vector<nets*>& neighbor)
 	server_address.sin_addr.s_addr = htonl (INADDR_ANY);
 	
 	//TODO: ODKOMENTOWAC !!!
-	//Bind (sockfd, (struct sockaddr*)&server_address, sizeof(server_address));
+	Bind (sockfd, (struct sockaddr*)&server_address, sizeof(server_address));
 	
 	struct timeval wait_time;
 	
