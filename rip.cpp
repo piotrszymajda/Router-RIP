@@ -27,8 +27,8 @@ void int32_to_char(u_int32_t x, u_int8_t* tab, int offset)
 int prepare_rib_msg(vector<nets*>& rib, u_int8_t* msg)
 {
 	int size = rib.size();
-	assert(size < 10000);
-    	if( size==0 )
+	assert( size < 10000 );
+	if( size == 0 )
 	{
 		string lonely = "I feel so lonely";
 		int length = lonely.copy((char*)msg,16);
@@ -36,7 +36,7 @@ int prepare_rib_msg(vector<nets*>& rib, u_int8_t* msg)
 	}
 
 	int32_to_char (size, msg, 0);
-    
+	
 	int cs = 0, i, ip, mask, dst;
 	for( i=0; i<size; ++i )
 	{
@@ -53,7 +53,7 @@ int prepare_rib_msg(vector<nets*>& rib, u_int8_t* msg)
 	}
 
 	int32_to_char (cs, msg, BYTE_BY_RECORD*(i+1)-2);
-    
+	
 #ifdef DEBUG 
 	cout << "Msg: ";
 	for( int j =0; j<BYTE_BY_RECORD*(i+2)-4; ++j )
@@ -65,7 +65,7 @@ int prepare_rib_msg(vector<nets*>& rib, u_int8_t* msg)
 }
 
 void rip (vector<nets*>& neighbor)
-{    
+{	
 	int sockfd = Socket (AF_INET, SOCK_DGRAM, 0);
 	int broadcast_perm = 1;
 	setsockopt (sockfd, SOL_SOCKET, SO_BROADCAST, (void *)&broadcast_perm, sizeof(broadcast_perm));
@@ -74,24 +74,24 @@ void rip (vector<nets*>& neighbor)
 	
 	struct sockaddr_in server_address;
 	bzero (&server_address, sizeof(server_address));
-	server_address.sin_family      = AF_INET;
-	server_address.sin_port        = htons (PORT);
-	server_address.sin_addr.s_addr = htonl (INADDR_ANY);
+	server_address.sin_family		= AF_INET;
+	server_address.sin_port			= htons (PORT);
+	server_address.sin_addr.s_addr	= htonl (INADDR_ANY);
 	
 	Bind (sockfd, (struct sockaddr*)&server_address, sizeof(server_address));
 	
-	struct timeval      wait_time;
+	struct timeval		wait_time;
 	
-	vector<nets*>       rib; //routing information base
-    
+	vector<nets*>		rib; //routing information base
+	
 	for( auto&& i: neighbor )
-	rib.push_back (new nets(*i));
+		rib.push_back (new nets(*i));
 
-	u_int8_t            rib_msg[IP_MAXPACKET];
+	u_int8_t			rib_msg[IP_MAXPACKET];
 	
-	struct sockaddr_in 	sender;	
-	u_int8_t		buffer[IP_MAXPACKET+1];
-    
+	struct sockaddr_in	sender;	
+	u_int8_t			buffer[IP_MAXPACKET+1];
+	
 	while( true )
 	{
 		bzero (&rib_msg, sizeof(rib_msg));
@@ -107,8 +107,8 @@ void rip (vector<nets*>& neighbor)
 		wait_time.tv_sec = WAIT_TIME / microsec_to_sec;
 		wait_time.tv_usec = WAIT_TIME % microsec_to_sec;
 		
-	    FD_ZERO (&read_fd);
-	    FD_SET (sockfd, &read_fd);
+		FD_ZERO (&read_fd);
+		FD_SET (sockfd, &read_fd);
 	
 		while( wait_time.tv_usec != 0 || wait_time.tv_sec != 0 )
 		{
@@ -121,7 +121,7 @@ void rip (vector<nets*>& neighbor)
 		
 			if( rc == 0 )
 			{
-	        	break;
+				break;
 			}
 		
 			#ifdef DEBUG 
@@ -138,11 +138,11 @@ void rip (vector<nets*>& neighbor)
 					cout << (int)buffer[j] << ' ';
 				cout << '\n';
 			#endif
-                
+				
 			// Sprawdż poprawność
 			// Sprawdź czy to coś nowego czy aktualizacja
-			// Sprawdź czy to nie juet usunięty wcześniej sąsiad ;)
-			// Sprawdzić czy od kogoś nic nie otrzymaliśmy
+			// Jeśli nowy -> Sprawdź czy to nie jest usunięty wcześniej sąsiad ;)
+			// Każdemu od kogo coś otrzmaliśmy robimy -> confirm_connection();
 		}
 		
 		for( auto iter = rib.begin(); iter != rib.end(); )
@@ -157,19 +157,17 @@ void rip (vector<nets*>& neighbor)
 				++iter;
 			}
 		}
-        
+		
 		cout << "\033[1mRouting table: \033[0m\n";
 		for( auto&& i: rib )
 			cout << *i << '\n';
 
 		cout << '\n';		
-
 	}
-	
 
 	for( auto&& i: rib )
 		delete i;
 	rib.clear();
-    
+	
 	close (sockfd);
 }
