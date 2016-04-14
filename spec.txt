@@ -35,7 +35,8 @@ z użyciem select'a program czeka na informacje od innych instancji programu.
 	
 ! Nadanie odległości nieskończoność i usunięcie wpisu z RIB'a:
 
-Nadanie odległości nieskończoność następuje w przypadku, gdy przez MAX_WAITING_TIME (domyślnie 5) nie otrzymaliśmy żadnych informacji o tej sieci. Odległość ta jest 
+Nadanie odległości nieskończoność następuje w przypadku, gdy przez MAX_WAITING_TIME 
+(domyślnie 5) nie otrzymaliśmy żadnych informacji o tej sieci. Odległość ta jest 
 dowolną wartością większą niż MAX_DIST (domyślnie 32). Zazwyczaj jest to MAX_DIST+1.
 
 Gdy jakaś sieć ma odległość nieskończoność to po TIME_TO_DELETE (domyślnie 5) jest

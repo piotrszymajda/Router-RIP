@@ -71,8 +71,6 @@ void rip (vector<nets*>& neighbor)
 	setsockopt (sockfd, SOL_SOCKET, SO_BROADCAST, (void *)&broadcast_perm, sizeof(broadcast_perm));
   
 	fd_set read_fd;
-	FD_ZERO (&read_fd);
-	FD_SET (sockfd, &read_fd);
 	
 	struct sockaddr_in server_address;
 	bzero (&server_address, sizeof(server_address));
@@ -109,6 +107,9 @@ void rip (vector<nets*>& neighbor)
 		wait_time.tv_sec = WAIT_TIME / microsec_to_sec;
 		wait_time.tv_usec = WAIT_TIME % microsec_to_sec;
 		
+	    FD_ZERO (&read_fd);
+	    FD_SET (sockfd, &read_fd);
+	
 		while( wait_time.tv_usec != 0 || wait_time.tv_sec != 0 )
 		{
 		
@@ -120,8 +121,8 @@ void rip (vector<nets*>& neighbor)
 		
 			if( rc == 0 )
 			{
-	        		break;
-	    		}
+	        	break;
+			}
 		
 			#ifdef DEBUG 
 				cout << "Reciving...\n";
