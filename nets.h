@@ -16,7 +16,6 @@ class nets
 {
     //ip adress
     struct 	sockaddr_in recp, broadcast;
-    struct	in_addr netmask_addr;
     struct	in_addr broadcast_addr;
     
     int 	netadress;
@@ -29,17 +28,23 @@ class nets
 
 public:
     nets (const char* ip_address, short mask, short dist, bool is_neighbor = false);
-    
+    nets (u_int32_t network_address, const struct sockaddr_in & sender, short mask, short dist, bool is_neighbor = false);
+ 
     int 	&operator ++();
+    bool 	operator == (const struct sockaddr_in &);
+    bool 	operator == (const int & netaddr);
     friend std::ostream& operator<< (std::ostream & os, const nets &net);
     
     int 	check_status();
     void	send(u_int8_t * msg, int msg_length, int socket);
     void	confirm_connection();
+    bool	same_network(const struct sockaddr_in &);
     
-    short   get_distance() { return distance; }
-    int     get_network_ip() { return netadress; }
-    short   get_network_mask() { return netmask; }
+    short	get_distance() { return distance; }
+    int		get_network_ip() { return netadress; }
+    short	get_network_mask() { return netmask; }
+    
+    bool	is_neighbor() { return neighbor; }
 };
 
 std::ostream& 

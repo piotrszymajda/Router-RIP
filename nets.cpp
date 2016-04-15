@@ -9,11 +9,11 @@
 #include "socket_op.h"
 
 nets::nets (const char* ip_address, short mask, short dist, bool is_neighbor)
-	:netmask(mask)
-	,distance(dist)
-	,neighbor(is_neighbor)
-	,last_recv(0)
-	,to_delete(-1)
+	:netmask{ mask }
+	,distance{ dist }
+	,neighbor{ is_neighbor }
+	,last_recv{ 0 }
+	,to_delete{ -1 }
 {
 	assert (mask >= 0 && mask <= 32);
 	assert (distance >= 0 && distance <= MAX_DIST);
@@ -28,9 +28,7 @@ nets::nets (const char* ip_address, short mask, short dist, bool is_neighbor)
 		exit(1);
 	}
 
-	netadress = (1 << (mask)) -1;
-	
-	netmask_addr.s_addr = netadress;
+	netadress = (1 << (mask))-1;
 	
 	int bc = recp.sin_addr.s_addr | (~ netadress);
 	netadress &= recp.sin_addr.s_addr;
@@ -47,6 +45,26 @@ nets::nets (const char* ip_address, short mask, short dist, bool is_neighbor)
 }
 
 
+nets::nets (u_int32_t network_address, const struct sockaddr_in & sender, short mask, short dist, bool is_neighbor)
+	:netmask{ mask }
+	,distance{ dist }
+	,neighbor{ is_neighbor }
+	,last_recv{ 0 }
+	,to_delete{ -1 }
+	,netadress{ (int)network_address }
+	,recp{ sender }
+{
+	
+	int bc = recp.sin_addr.s_addr | (~( (1 << (mask))-1 ));
+	
+	broadcast_addr.s_addr 	= bc;
+	
+	bzero (&broadcast, sizeof(broadcast));
+	broadcast.sin_family 	= AF_INET;
+	broadcast.sin_port		= htons(PORT);
+	broadcast.sin_addr		= broadcast_addr;
+}
+
 int & nets::operator ++()
 {
 	++last_recv;
@@ -62,6 +80,21 @@ int & nets::operator ++()
 #endif
 
 	return last_recv;
+}
+
+bool nets::operator == (const struct sockaddr_in & sender)
+{
+	//std::cout << recp.sin_addr.s_addr << " == " << sender.sin_addr.s_addr << '\n';
+	if( recp.sin_addr.s_addr == sender.sin_addr.s_addr )
+		return true;
+	return false;
+}
+
+bool nets::operator == (const int & netaddr)
+{
+	if( netadress == netaddr )
+		return true;
+	return false;
 }
 
 std::ostream& 
@@ -107,7 +140,7 @@ int nets::check_status()
 	return 1;
 }
 
-void nets::send(u_int8_t * msg, int msg_length, int socket)
+void nets::send (u_int8_t * msg, int msg_length, int socket)
 {
 	Sendto(socket, msg, msg_length, 0, &broadcast);
 	
@@ -123,4 +156,9 @@ void nets::confirm_connection()
 {
 	last_recv = 0;
 	to_delete = -1;
+}
+
+bool nets::same_network (const struct sockaddr_in & sender)
+{
+	return (netadress < sender.sin_addr.s_addr) && (sender.sin_addr.s_addr < broadcast_addr.s_addr);
 }

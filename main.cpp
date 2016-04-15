@@ -15,7 +15,7 @@ i tworzenia tablic przekazywania - drugie zad. programistyczne na SK
 #include "rip.h"
 
 #define VERSION 1
-#define BUILD 6
+#define BUILD 7
 
 using namespace std;
 
@@ -41,21 +41,21 @@ int main (int argc, char *argv[])
         return 1;
     }
     
-    vector<nets*> neighbor;
+    vector<nets*> interfaces;
  
-    short interfaces;
+    short no_interfaces;
     cout << "Enter the number of interfaces: ";
-    cin >> interfaces;
+    cin >> no_interfaces;
     
-    if( interfaces <= 0 )
+    if( no_interfaces <= 0 )
    	{
    		cout << "I feel so lonely ;( \n";
    		return 0;
    	}
    	
-    cout << "Enter interfaces configuration (" << interfaces << " times):\n";
+    cout << "Enter interfaces configuration (" << no_interfaces << " times):\n";
  
-    while( interfaces-- )
+    while( no_interfaces-- )
     {
         string ip, tmp;
         short mask, dst;
@@ -63,19 +63,19 @@ int main (int argc, char *argv[])
         cin.ignore (100, '/');
         cin >> mask >> tmp >> dst;
         
-        neighbor.push_back (new nets(ip.c_str(), mask, dst, true));
+        interfaces.push_back (new nets(ip.c_str(), mask, dst, true));
     }
         
     cout << "------------------------------------------\n";
     cout << "\033[1mStarting RIP with following configuration: \033[0m\n";
-    for( auto&& i: neighbor ) // access by reference
+    for( auto&& i: interfaces ) // access by reference
         cout << "> " << *i << '\n';
     cout << "------------------------------------------\n";
     
     // start RIP
-    rip (neighbor);
+    rip (interfaces);
     
-	for( auto&& i: neighbor )
+	for( auto&& i: interfaces )
 		delete i;
 
     return 0;
