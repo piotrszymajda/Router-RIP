@@ -7,6 +7,7 @@ i tworzenia tablic przekazywania - drugie zad. programistyczne na SK
 #include <iostream>
 #include <cstring>
 #include <vector>
+#include <assert.h>
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -15,7 +16,7 @@ i tworzenia tablic przekazywania - drugie zad. programistyczne na SK
 #include "rip.h"
 
 #define VERSION 1
-#define BUILD 8
+#define BUILD 9
 
 using namespace std;
 
@@ -40,7 +41,7 @@ int main (int argc, char *argv[])
         }
         return 1;
     }
-    
+	
     vector<nets*> interfaces;
  
     short no_interfaces;
@@ -89,7 +90,7 @@ void man()
     cout << "Router - program that implement algorithm of distance vector\n";
     cout << "\t and creating forwarding table.\n";
     cout << "\nUsage:\n";
-    cout << "\tsudo ./router - for start program\n";
+    cout << "\t./router - for start program\n";
     cout << "\t./router -h - for display this help\n";
     cout << "\t./router -v - for display version\n";
     cout << "\n";

@@ -8,7 +8,7 @@
 
 #include "socket_op.h"
 
-#define WAIT_TIME 30000000LL // 30 sec in microsec
+#define WAIT_TIME 15000000LL // 30 sec in microsec
 
 #define microsec_to_sec 1000000LL
 #define microsec_to_milisec 1000LL
@@ -57,7 +57,7 @@ int prepare_rib_msg(vector<nets*>& rib, u_int8_t* msg)
 		msg[9+i*6] = dst;
 	}
 	
-	for( int j=0; j<BYTE_BY_RECORD*(i+1)-2; ++j)
+	for( int j=0; j<BYTE_BY_RECORD*(i+1)-2; ++j )
 	{
 		cs += (int)msg[j];
 	}
@@ -175,13 +175,13 @@ void rip (vector<nets*>& interfaces)
 			
 			// check checksum
 			int cs = 0;
-			for(int j=0; j< rec_bytes-4; ++j )
+			for( int j=0; j< rec_bytes-4; ++j )
 			{
 				cs += buffer[j];
 			}
 			int cs_from_msg = char_to_int32(buffer, rec_bytes-4);
 			
-			if(cs != cs_from_msg)
+			if( cs != cs_from_msg )
 			{
 				#ifdef DEBUG 
 					cout << "Wrong checksum: " << cs << " <> " << cs_from_msg << '\n';
@@ -191,7 +191,7 @@ void rip (vector<nets*>& interfaces)
 			
 			bool nothing_intresting = false;
 			
-			if (strcmp((char*)buffer, MSG_WHEN_RIB_IS_EMPTY) == 0)
+			if( strcmp((char*)buffer, MSG_WHEN_RIB_IS_EMPTY) == 0 )
 			{
 				#ifdef DEBUG
 					char sender_ip [20]; 
@@ -217,13 +217,13 @@ void rip (vector<nets*>& interfaces)
 			}
 			if( !known_interface )
 			{
-				cout << "What? \n";
-				assert(false);
+				cout << "What? How could we get packet like this?\n";
+				assert( false );
 			}
 			
-			if(!nothing_intresting)
+			if( !nothing_intresting )
 			{
-				// parsowanie wiadomości:
+				// parse message:
 				int size = char_to_int32(buffer, 0);
 				for( int i = 0; i<size; ++i )
 				{
@@ -248,20 +248,20 @@ void rip (vector<nets*>& interfaces)
 
 							if ( (*i) == sender || i->same_network( sender ) )
 							{
-								//cout << " - znam i gosc\n";
 								int tmp_dst = dst;
 								if( ! i->same_network( sender ) )
 									tmp_dst += distance_to_network;
 								
-								if( i->get_distance() != tmp_dst )
-									cout << "Change " << i->get_distance() << " to " << tmp_dst << '\n';
+								#ifdef DEBUG
+									if( i->get_distance() != tmp_dst )
+										cout << "Change " << i->get_distance() << " to " << tmp_dst << '\n';
+								#endif
 								
 								i->set_distance( tmp_dst );
 								i->confirm_connection();
 							}
 							else
 							{
-								//cout << " - znam i ktos inny\n";
 								if( i->get_distance() > distance_to_network + dst)
 								{
 									i->set_distance( distance_to_network + dst );
@@ -276,20 +276,17 @@ void rip (vector<nets*>& interfaces)
 					if( !known )
 					{
 						// check if this is old (deleted from rib) interface
-						
 						for( auto&& i: interfaces )
 						{
 							if( (*i) == network_addr )
 							{
 								assert( !known ); 
-								//cout << " - znam, ale zapomnialem\n";
 								known = true;
 								rib.push_back( new nets(*i) );
 							}
 						}
 						if( !known )
 						{
-							//cout << " - nowa siec: "<< dst <<'+'<< distance_to_network <<"\n";
 							rib.push_back( new nets(network_addr, sender, mask, dst + distance_to_network) );
 						}
 					}
@@ -298,10 +295,10 @@ void rip (vector<nets*>& interfaces)
 			}
 			else
 			{
-				// ktoś się czuje samotnty i to napewno mój sąsiad
-				// sprawdz czy mam o nim wpis w ribie
-				// jeśli tak to confirm_connection();
-				// jeśli nie to rib.push_back( new nets(from_interface) );
+				// someone feel lonely, it must be my neighbor
+				// check that I have him in rib
+				// if yes -> confirm_connection()
+				// if not -> add to rib
 				bool known = false;
 				for( auto&& i: rib )
 				{
@@ -318,11 +315,6 @@ void rip (vector<nets*>& interfaces)
 					rib.push_back( new nets(*from_interface) );
 				}
 			}
-				
-			// Sprawdż poprawność
-			// Sprawdź czy to coś nowego czy aktualizacja
-			// Jeśli nowy -> Sprawdź czy to nie jest usunięty wcześniej sąsiad ;)
-			// Każdemu od kogo coś otrzmaliśmy robimy -> confirm_connection();
 		}
 		
 		for( auto iter = rib.begin(); iter != rib.end(); )

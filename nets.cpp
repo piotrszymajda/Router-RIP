@@ -15,8 +15,8 @@ nets::nets (const char* ip_address, short mask, short dist, bool is_neighbor)
 	,last_recv{ 0 }
 	,to_delete{ -1 }
 {
-	assert (mask >= 0 && mask <= 32);
-	assert (distance >= 0 && distance <= MAX_DIST);
+	assert( mask >= 0 && mask <= 32 );
+	assert( distance >= 0 && distance <= MAX_DIST );
 	 
 	bzero (&via, sizeof(via));
 	via.sin_family 	= AF_INET;
@@ -41,7 +41,7 @@ nets::nets (const char* ip_address, short mask, short dist, bool is_neighbor)
 	broadcast.sin_addr		= broadcast_addr;
 	
 	
-	assert(to_delete == -1);
+	assert( to_delete == -1 ); // for sure
 }
 
 
@@ -55,7 +55,7 @@ nets::nets (u_int32_t network_address, const struct sockaddr_in & sender, short 
 	,to_delete{ -1 }
 {
 	
-	int bc = via.sin_addr.s_addr | (~( (1 << (mask))-1 ));
+	int bc = network_address | (~( (1 << (mask))-1 ));
 	
 	broadcast_addr.s_addr 	= bc;
 	
@@ -151,7 +151,7 @@ void nets::send (u_int8_t * msg, int msg_length, int socket)
 {	
 	#ifdef DEBUG 
 		std::cout << "Sending ";
-		for(int i=0; i<msg_length; ++i)
+		for( int i=0; i<msg_length; ++i )
 			std::cout << (int)msg[i] << ' '; 
 		std::cout << '\n';
 	#endif 
@@ -176,16 +176,20 @@ bool nets::same_network (const struct sockaddr_in & sender)
 		std::cout << net_ip << ' ';
 		
 		char *sender_ip = inet_ntoa (sender.sin_addr);
-		std::cout << sender_ip << ' ';
+		std::cout << "\033[1m" << sender_ip << "\033[0m ";
 		
 		char *bc_ip = inet_ntoa (broadcast_addr);
-		std::cout << bc_ip << '\n';
+		std::cout << bc_ip << " - ";
 	#endif 
 	
 	if( (unsigned int) ntohl(netadress) > ntohl(sender.sin_addr.s_addr) )
 		return false;
 	if( ntohl(sender.sin_addr.s_addr) > ntohl(broadcast_addr.s_addr) )
 		return false;
+	
+	#ifdef DEBUG 
+		std::cout << "YEAP\n";
+	#endif
 	
 	return true;
 }
