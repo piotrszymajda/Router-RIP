@@ -15,7 +15,8 @@
 class nets
 {
     //ip adress
-    struct 	sockaddr_in recp, broadcast;
+    struct 	sockaddr_in via; 
+	struct 	sockaddr_in broadcast;
     struct	in_addr broadcast_addr;
     
     int 	netadress;
@@ -44,6 +45,10 @@ public:
     int		get_network_ip() { return netadress; }
     short	get_network_mask() { return netmask; }
     
+    void	set_distance(short dst) { distance = dst; }
+	void 	set_neighbor(bool is) { neighbor = is; }
+    void	set_via(const struct sockaddr_in sender) { via = sender; }
+	
     bool	is_neighbor() { return neighbor; }
 };
 

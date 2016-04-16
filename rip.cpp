@@ -78,11 +78,6 @@ int netaddress(int ip, short netmask )
 {
 	int	netaddr = (1 << (netmask)) -1;
 	
-	#ifdef DEBUG
-		cout << ip << '\\' << netmask << '-';
-		cout << (netaddr & ip) << '\n';
-	#endif
-	
 	return netaddr & ip;
 }
 
@@ -171,14 +166,28 @@ void rip (vector<nets*>& interfaces)
 				continue;
 			}
 			
-			// TODO: check checksum
-			
 			#ifdef DEBUG 
 				cout << "Recived msg: ";
-				for( int j =0; j<rec_bytes; ++j )
+				for( int j=0; j<rec_bytes; ++j )
 					cout << (int)buffer[j] << ' ';
 				cout << '\n';
 			#endif	
+			
+			// check checksum
+			int cs = 0;
+			for(int j=0; j< rec_bytes-4; ++j )
+			{
+				cs += buffer[j];
+			}
+			int cs_from_msg = char_to_int32(buffer, rec_bytes-4);
+			
+			if(cs != cs_from_msg)
+			{
+				#ifdef DEBUG 
+					cout << "Wrong checksum: " << cs << " <> " << cs_from_msg << '\n';
+				#endif
+				continue;
+			}
 			
 			bool nothing_intresting = false;
 			
@@ -200,6 +209,7 @@ void rip (vector<nets*>& interfaces)
 			{
 				if( i->same_network( sender ) )
 				{
+					assert( !known_interface );
 					distance_to_network = i->get_distance();
 					from_interface = i;
 					known_interface = true;
@@ -208,6 +218,7 @@ void rip (vector<nets*>& interfaces)
 			if( !known_interface )
 			{
 				cout << "What? \n";
+				assert(false);
 			}
 			
 			if(!nothing_intresting)
@@ -216,45 +227,70 @@ void rip (vector<nets*>& interfaces)
 				int size = char_to_int32(buffer, 0);
 				for( int i = 0; i<size; ++i )
 				{
-					int ip 		= char_to_int32(buffer, 4+6*i);
-					int mask 	= buffer[8+6*i];
-					int dst 	= buffer[9+6*i];
+					int network_addr	= char_to_int32(buffer, 4+6*i);
+					short mask 			= buffer[8+6*i];
+					short dst 			= buffer[9+6*i];
 					
 					#ifdef DEBUG
-						cout << ip << '/' << mask << " dst: " << dst << '\n';
+						struct in_addr addr;
+						addr.s_addr = network_addr;
+						char *net_ip = inet_ntoa (addr);
+						
+						cout << net_ip << '/' << mask << " dst: " << dst << '\n';
 					#endif 
-					
-					int network_address =  netaddress (ip, mask);
 				
 					bool known = false;
 					for( auto&& i: rib )
 					{
-						if( (*i) == network_address )
+						if( (*i) == network_addr )
 						{	
 							assert( !known );
-							//if recp == sender ? 
-							cout << "Znam go i mam wpis o nim!\n";
-							i->confirm_connection();
+
+							if ( (*i) == sender || i->same_network( sender ) )
+							{
+								//cout << " - znam i gosc\n";
+								int tmp_dst = dst;
+								if( ! i->same_network( sender ) )
+									tmp_dst += distance_to_network;
+								
+								if( i->get_distance() != tmp_dst )
+									cout << "Change " << i->get_distance() << " to " << tmp_dst << '\n';
+								
+								i->set_distance( tmp_dst );
+								i->confirm_connection();
+							}
+							else
+							{
+								//cout << " - znam i ktos inny\n";
+								if( i->get_distance() > distance_to_network + dst)
+								{
+									i->set_distance( distance_to_network + dst );
+									i->set_via( sender );
+									i->confirm_connection();
+								}
+								
+							}
 							known = true;
 						}
 					}
 					if( !known )
 					{
-						// sprawdzic czy to nie jest jakiś zapomniany interfejs
+						// check if this is old (deleted from rib) interface
 						
 						for( auto&& i: interfaces )
 						{
-							if( (*i) == network_address )
+							if( (*i) == network_addr )
 							{
 								assert( !known ); 
-								cout << "Znam go, ale już dawno o nim zapomniałem.\n";
+								//cout << " - znam, ale zapomnialem\n";
 								known = true;
 								rib.push_back( new nets(*i) );
 							}
 						}
 						if( !known )
 						{
-							rib.push_back( new nets(network_address, sender, mask, dst + distance_to_network) );
+							//cout << " - nowa siec: "<< dst <<'+'<< distance_to_network <<"\n";
+							rib.push_back( new nets(network_addr, sender, mask, dst + distance_to_network) );
 						}
 					}
 		

@@ -16,6 +16,8 @@ Specyfikacja protokołu wymiany informacji pomiędzy instancjami programu router
 OPIS:
 ------
 Implementacja protokołu RIP na 2 pracowanie programistyczną z sieci.
+Wszystkie nazwy pisane DUŻYMI_LITERAMI to nazwy dyrektyw #define
+które definiują pewne istotne dla działania programu stałe.
 
 TURA:
 ------
@@ -24,12 +26,13 @@ Co ture wysyłana jest zawartość wektora rib (Routing Information Base) wedłu
 specyfikacj zdefiniowanej w "FORMAT PRZESYŁANYCH DANYCH". Następnie przez WAIT_TIME
 z użyciem select'a program czeka na informacje od innych instancji programu.
 
-	Schemat tury:	
+	Uproszczony schemat tury:	
 	 1. skonstruj wiadmość z wektora rib
 	 2. wyślij dane w pakietach do wszystkich sąsaiadów (po broadcast'cie)
 	 3. czekaj na jakieś info przez WAIT_TIME czasu, ciągłymi select'ami
-	    3a. jeśli coś przyjdzie sprawdzić poprawność i sprawdzić czy nie ma tego rib'ie
-	    3b. jeśli jest to zaktualizowć, wpp dodać do rib'a
+		3a. jeśli to pakiet wysłany przez nas (tą instancje programu) to pominąć
+	    3b. jeśli coś przyjdzie sprawdzić poprawność i sprawdzić czy nie ma tego rib'ie
+	    3c. jeśli jest to zaktualizowć, wpp dodać do rib'a
      4. usuń wpisy od sieci o których już długo nie mamy informacji
 	 5. wypisz informacje
 	
@@ -87,8 +90,7 @@ Uwaga: Wszystkie int32 są zapisywane w Little endian (bajty zapisywane są w
 Dzięki takiemu ułożeniu w wiadmości może zmieścić się przeszło 10 tys. wpisów. 
 IP_MAXPACKET = 65535 stąd (65 535 - 8)/6 ~ 60 000/6 = 10 000.
 
-
 SUMA KONTROLNA:
 ----------------
-Suma kontrolna jest sumą wszystkich przesłanych adresów ip, mask sieci, dystansów
-w danej wiadomości. Uwaga: bajty adresu ip są w odwróconej kolejności. 
+Suma kontrolna jest sumą wszystkich bajtów w danej wiadomości. Oczywiście poza
+ostatnimi 4 gdzie zapisana jest suma kontrolna.

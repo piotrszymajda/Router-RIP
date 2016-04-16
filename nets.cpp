@@ -18,11 +18,11 @@ nets::nets (const char* ip_address, short mask, short dist, bool is_neighbor)
 	assert (mask >= 0 && mask <= 32);
 	assert (distance >= 0 && distance <= MAX_DIST);
 	 
-	bzero (&recp, sizeof(recp));
-	recp.sin_family 	= AF_INET;
-	recp.sin_port		= htons(PORT);
+	bzero (&via, sizeof(via));
+	via.sin_family 	= AF_INET;
+	via.sin_port		= htons(PORT);
 		
-	if( inet_pton(AF_INET, ip_address, &(recp.sin_addr)) != 1 )
+	if( inet_pton(AF_INET, ip_address, &(via.sin_addr)) != 1 )
 	{
 		std::cout << "\033[1;31mError: \033[0m" << ip_address<< " is NOT IP address\n";
 		exit(1);
@@ -30,8 +30,8 @@ nets::nets (const char* ip_address, short mask, short dist, bool is_neighbor)
 
 	netadress = (1 << (mask))-1;
 	
-	int bc = recp.sin_addr.s_addr | (~ netadress);
-	netadress &= recp.sin_addr.s_addr;
+	int bc = via.sin_addr.s_addr | (~ netadress);
+	netadress &= via.sin_addr.s_addr;
 	
 	broadcast_addr.s_addr = bc;
 	
@@ -46,16 +46,16 @@ nets::nets (const char* ip_address, short mask, short dist, bool is_neighbor)
 
 
 nets::nets (u_int32_t network_address, const struct sockaddr_in & sender, short mask, short dist, bool is_neighbor)
-	:netmask{ mask }
+	:via{ sender }
+	,netadress{ (int)network_address }
+	,netmask{ mask }
 	,distance{ dist }
 	,neighbor{ is_neighbor }
 	,last_recv{ 0 }
 	,to_delete{ -1 }
-	,netadress{ (int)network_address }
-	,recp{ sender }
 {
 	
-	int bc = recp.sin_addr.s_addr | (~( (1 << (mask))-1 ));
+	int bc = via.sin_addr.s_addr | (~( (1 << (mask))-1 ));
 	
 	broadcast_addr.s_addr 	= bc;
 	
@@ -75,8 +75,8 @@ int & nets::operator ++()
 		
 #ifdef DEBUG 
 	char host_ip [20]; 
-	inet_ntop (AF_INET, &(recp.sin_addr), host_ip, sizeof(host_ip));
-	std::cout << "To delete: " << host_ip << " " << to_delete << '\n';
+	inet_ntop (AF_INET, &(via.sin_addr), host_ip, sizeof(host_ip));
+	std::cout << "To delete: " << host_ip << " " << to_delete << " lr: " << last_recv << '\n';
 #endif
 
 	return last_recv;
@@ -84,8 +84,7 @@ int & nets::operator ++()
 
 bool nets::operator == (const struct sockaddr_in & sender)
 {
-	//std::cout << recp.sin_addr.s_addr << " == " << sender.sin_addr.s_addr << '\n';
-	if( recp.sin_addr.s_addr == sender.sin_addr.s_addr )
+	if( via.sin_addr.s_addr == sender.sin_addr.s_addr )
 		return true;
 	return false;
 }
@@ -116,7 +115,7 @@ operator << (std::ostream & os, const nets & net)
 	else
 	{
 	    char host_ip [20]; 
-	    inet_ntop (AF_INET, &(net.recp.sin_addr), host_ip, sizeof(host_ip));
+	    inet_ntop (AF_INET, &(net.via.sin_addr), host_ip, sizeof(host_ip));
 	
 		os << net_ip << '/' << net.netmask << " distance " << net.distance << " via " << host_ip;
 	}
@@ -125,12 +124,20 @@ operator << (std::ostream & os, const nets & net)
 }
 
 int nets::check_status()
-{
-	if( to_delete < 0 && last_recv > MAX_WAITING_TIME)
+{	
+	if( to_delete < 0 )
 	{
-		distance = MAX_DIST + 1;
-		to_delete = TIME_TO_DELETE;
-		return 0;
+		if( distance > MAX_DIST )
+		{
+			to_delete = TIME_TO_DELETE;
+			return 0;
+		}
+		if( last_recv > MAX_WAITING_TIME)
+		{
+			distance = MAX_DIST + 1;
+			to_delete = TIME_TO_DELETE;
+			return 0;
+		}
 	}
 	if( to_delete == 0 )
 	{
@@ -141,24 +148,44 @@ int nets::check_status()
 }
 
 void nets::send (u_int8_t * msg, int msg_length, int socket)
-{
-	Sendto(socket, msg, msg_length, 0, &broadcast);
+{	
+	#ifdef DEBUG 
+		std::cout << "Sending ";
+		for(int i=0; i<msg_length; ++i)
+			std::cout << (int)msg[i] << ' '; 
+		std::cout << '\n';
+	#endif 
 	
-#ifdef DEBUG 
-	std::cout << "Sending ";
-	for(int i=0; i<msg_length; ++i)
-	    std::cout << (int)msg[i] << ' '; 
-	std::cout << '\n';
-#endif 
+	Sendto(socket, msg, msg_length, 0, &broadcast);
 }
 
 void nets::confirm_connection()
 {
 	last_recv = 0;
-	to_delete = -1;
+	if( distance <= MAX_DIST )
+		to_delete = -1;
 }
 
 bool nets::same_network (const struct sockaddr_in & sender)
 {
-	return (netadress < sender.sin_addr.s_addr) && (sender.sin_addr.s_addr < broadcast_addr.s_addr);
+	#ifdef DEBUG 
+		struct in_addr addr;
+		addr.s_addr = netadress;
+		
+		char *net_ip = inet_ntoa (addr);
+		std::cout << net_ip << ' ';
+		
+		char *sender_ip = inet_ntoa (sender.sin_addr);
+		std::cout << sender_ip << ' ';
+		
+		char *bc_ip = inet_ntoa (broadcast_addr);
+		std::cout << bc_ip << '\n';
+	#endif 
+	
+	if( (unsigned int) ntohl(netadress) > ntohl(sender.sin_addr.s_addr) )
+		return false;
+	if( ntohl(sender.sin_addr.s_addr) > ntohl(broadcast_addr.s_addr) )
+		return false;
+	
+	return true;
 }
