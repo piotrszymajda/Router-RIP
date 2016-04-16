@@ -15,8 +15,8 @@ i tworzenia tablic przekazywania - drugie zad. programistyczne na SK
 #include "nets.h"
 #include "rip.h"
 
-#define VERSION 1
-#define BUILD 9
+#define VERSION 2
+#define BUILD 10
 
 using namespace std;
 
@@ -36,7 +36,7 @@ int main (int argc, char *argv[])
         }
         else
         {
-            cout << "Error: Wrong argument\n";
+            cout << "\033[1;31mError:\033[0m Wrong argument\n";
             man ();
         }
         return 1;
@@ -66,7 +66,23 @@ int main (int argc, char *argv[])
         
         interfaces.push_back (new nets(ip.c_str(), mask, dst, true));
     }
-        
+	
+	for( auto&& i: interfaces )	
+	{
+		for( auto&& j: interfaces )
+		{
+			if( i != j )
+			{
+				if( i->same_network(j->get_via_ip()) || j->same_network(i->get_via_ip()) )
+				{
+					cout << "\033[1;31mError:\033[0m Wrong network configuration. Networks are not separable\n";
+					cout << (*i) << '\n' << (*j) << '\n';
+					return 2;
+				}
+			}
+		}
+	}
+	
     cout << "------------------------------------------\n";
     cout << "\033[1mStarting RIP with following configuration: \033[0m\n";
     for( auto&& i: interfaces ) // access by reference

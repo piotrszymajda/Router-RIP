@@ -18,12 +18,18 @@ int Socket(int family, int type, int protocol)
 	return fd;
 }
 
-void Sendto(int fd, const void *buff, int buff_length, int flags, const struct sockaddr_in *saddr)
+int Sendto(int fd, const void *buff, int buff_length, int flags, const struct sockaddr_in *saddr)
 {
 	int sent_bytes = sendto (fd, buff, buff_length, flags, (struct sockaddr*)saddr, sizeof(*saddr));
 	
 	if( sent_bytes == -1 || sent_bytes != buff_length )
-        print_error ("sendto", -2);
+	{
+		if( errno != ENETUNREACH )
+			print_error ("sendto", -2);
+		else
+			return 1;
+	}
+	return 0;
 }
 
 void Setsockopt(int sockfd, int level, int name, const void *val, socklen_t len)

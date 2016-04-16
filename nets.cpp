@@ -147,7 +147,7 @@ int nets::check_status()
 	return 1;
 }
 
-void nets::send (u_int8_t * msg, int msg_length, int socket)
+int nets::send (u_int8_t * msg, int msg_length, int socket)
 {	
 	#ifdef DEBUG 
 		std::cout << "Sending ";
@@ -156,7 +156,7 @@ void nets::send (u_int8_t * msg, int msg_length, int socket)
 		std::cout << '\n';
 	#endif 
 	
-	Sendto(socket, msg, msg_length, 0, &broadcast);
+	return Sendto(socket, msg, msg_length, 0, &broadcast);
 }
 
 void nets::confirm_connection()

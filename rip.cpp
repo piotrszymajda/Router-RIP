@@ -114,8 +114,22 @@ void rip (vector<nets*>& interfaces)
 		bzero (&rib_msg, sizeof(rib_msg));
 		int msg_length = prepare_rib_msg(rib, rib_msg);
 		for( auto&& i: interfaces )
-			i->send (rib_msg, msg_length, sockfd);
-	
+		{
+			if( i->send (rib_msg, msg_length, sockfd) != 0 )
+			{
+				//cout << "Send error to " << (*i) << "\n"; 
+				//found in rib and set inf distance
+				for( auto&& j: rib )
+				{
+					if( j->is_neighbor() && i->same_network( j->get_via_ip() ) )
+					{
+						//cout << "Find " << (*j) << "\n";
+						j->set_distance( MAX_DIST + 1 );
+					}
+				}
+			}
+		}
+		
 		// increment the value of the variable containing the last round in which we received a reply
 		for( auto&& i: rib )
 			++(*i);
@@ -179,8 +193,8 @@ void rip (vector<nets*>& interfaces)
 			{
 				cs += buffer[j];
 			}
-			int cs_from_msg = char_to_int32(buffer, rec_bytes-4);
 			
+			int cs_from_msg = char_to_int32(buffer, rec_bytes-4);
 			if( cs != cs_from_msg )
 			{
 				#ifdef DEBUG 
@@ -266,6 +280,14 @@ void rip (vector<nets*>& interfaces)
 								{
 									i->set_distance( distance_to_network + dst );
 									i->set_via( sender );
+									if( from_interface->same_network( sender ) )
+									{
+										i->set_neighbor( false );
+									}
+									else
+									{
+										i->set_neighbor( true );
+									}
 									i->confirm_connection();
 								}
 								

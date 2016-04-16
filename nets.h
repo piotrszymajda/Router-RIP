@@ -37,14 +37,15 @@ public:
     friend std::ostream& operator<< (std::ostream & os, const nets &net);
     
     int 	check_status();
-    void	send(u_int8_t * msg, int msg_length, int socket);
+    int	send(u_int8_t * msg, int msg_length, int socket);
     void	confirm_connection();
     bool	same_network(const struct sockaddr_in &);
     
     short	get_distance() { return distance; }
     int		get_network_ip() { return netadress; }
     short	get_network_mask() { return netmask; }
-    
+    struct 	sockaddr_in get_via_ip() { return via; } 
+	
     void	set_distance(short dst) { distance = dst; }
 	void 	set_neighbor(bool is) { neighbor = is; }
     void	set_via(const struct sockaddr_in sender) { via = sender; }
