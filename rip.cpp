@@ -297,6 +297,9 @@ void rip (vector<nets*>& interfaces)
 					}
 					if( !known )
 					{
+						if( dst > MAX_DIST ) //if this is unreachable net
+							continue;
+							
 						// check if this is old (deleted from rib) interface
 						for( auto&& i: interfaces )
 						{
@@ -314,6 +317,21 @@ void rip (vector<nets*>& interfaces)
 					}
 		
 				}
+				// Check if we have sender in RIB
+				bool have = false;
+				for( auto&& i: rib )
+				{
+					if( i->is_neighbor() && ((*i) == sender || i->same_network( sender )) )
+					{	
+						assert( !have );
+						i->confirm_connection();
+						have = true;
+					}
+				}
+				if( !have )
+				{
+					rib.push_back( new nets(*from_interface) );
+				}
 			}
 			else
 			{
@@ -327,7 +345,6 @@ void rip (vector<nets*>& interfaces)
 					if( i->is_neighbor() && (*i) == sender )
 					{	
 						assert( !known );
-						cout << "Znam go i mam wpis o nim!\n";
 						i->confirm_connection();
 						known = true;
 					}

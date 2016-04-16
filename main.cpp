@@ -16,7 +16,7 @@ i tworzenia tablic przekazywania - drugie zad. programistyczne na SK
 #include "rip.h"
 
 #define VERSION 2
-#define BUILD 10
+#define BUILD 11
 
 using namespace std;
 
@@ -66,7 +66,7 @@ int main (int argc, char *argv[])
         
         interfaces.push_back (new nets(ip.c_str(), mask, dst, true));
     }
-	
+	// check initial configuration
 	for( auto&& i: interfaces )	
 	{
 		for( auto&& j: interfaces )
@@ -75,8 +75,8 @@ int main (int argc, char *argv[])
 			{
 				if( i->same_network(j->get_via_ip()) || j->same_network(i->get_via_ip()) )
 				{
-					cout << "\033[1;31mError:\033[0m Wrong network configuration. Networks are not separable\n";
-					cout << (*i) << '\n' << (*j) << '\n';
+					cout << "\033[1;31mError:\033[0m Wrong network configuration. This networks are not separable:\n";
+					cout << "> " << (*i) << '\n' << "> " << (*j) << '\n';
 					return 2;
 				}
 			}
@@ -103,9 +103,9 @@ Function displays manual
 */
 void man()
 {
-    cout << "Router - program that implement algorithm of distance vector\n";
+    cout << "\033[1;36mRouter\033[0m - program that implement algorithm of distance vector\n";
     cout << "\t and creating forwarding table.\n";
-    cout << "\nUsage:\n";
+    cout << "\n\033[1mUsage:\033[0m\n";
     cout << "\t./router - for start program\n";
     cout << "\t./router -h - for display this help\n";
     cout << "\t./router -v - for display version\n";
@@ -115,7 +115,7 @@ void man()
     cout << "IP addresses contained in the next N lines. Each entry is as follows:\n";
     cout << "\t<IP address> netmask /M distance D\n";
     cout << "Where M is from 0 to 32, and D is from 0 to " << MAX_DIST << "\n";
-    cout << "\nFor example:\n";
+    cout << "\n\033[1mFor example:\033[0m\n";
     cout << "\t2\n";
     cout << "\t10.0.1.1 netmask /8 distance 3\n";
     cout << "\t192.168.5.43 netmask /24 distance 2\n";
